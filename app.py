@@ -213,6 +213,6 @@ if uploaded_file is not None:
                     prob = torch.sigmoid(outputs).numpy()
                     prediction = (prob > 0.99)
                     if prediction[0] == 1:
-                        st.success(f"Le billet semble être une coupure authentique de 10,000 XAF, avec un seuil de {prob:.2f}")
+                        st.success(f"Le billet semble être une coupure authentique de 10,000 XAF, avec un seuil de {prob}")
                     else:
-                        st.error(f"Alerte : Probabilité de contrefaçon détectée !, avec un seuil de {prob:.2f}")
+                        st.error(f"Alerte : Probabilité de contrefaçon détectée !, avec un seuil de {prob}")
