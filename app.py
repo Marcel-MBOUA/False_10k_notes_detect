@@ -215,4 +215,4 @@ if uploaded_file is not None:
                     if prediction[0] == 1:
                         st.success(f"Le billet semble être une coupure authentique de 10,000 XAF, avec un seuil de {prob:.2f}")
                     else:
-                        st.error(f"Alerte : Probabilité de contrefaçon détectée !, avec un seuil de {float(prob):.2f}")
+                        st.error(f"Alerte : Probabilité de contrefaçon détectée !, avec un seuil de {prob:.2f}")
