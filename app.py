@@ -159,42 +159,71 @@ def tight_crop_banknote(img):
  
 # --- UI Streamlit ---
 st.set_page_config(page_title="False 10K_Detect", layout="wide")
-
 col1, col2 = st.columns([10, 1])
-
 with col2:
-    language = st.selectbox('Choisissez votre langue \n Select your language :', ['Francais', 'English'])
+    lang = st.radio("🌐 Langue / Language", ["Français", "English"], horizontal=True)
 
 LANGUAGES = {
-    "Francais": {
+    "Français": {
+        "sidebar_title": "À propos de l'auteur",
+        "role": "**Data Scientist & AI Engineer**",
+        "bio": "Passionné par l'intersection de l'IA et de la finance. Ce projet démontre l'application de la **Vision par ordinateur** pour sécuriser les transactions en zone CEMAC.",
+        "linkedin_btn": "Mon Profil LinkedIn",
+        "lang_label": "Choisir la langue",
         "button_label": "Analyser le billet",
         "title": "Détecteur de faux billets (10 000 FCFA)",
-        'upload label': "Choisissez une image du billet :",
-        'contour fail': "Contour du billet non détecté, veuillez reprendre l'image.",
-        'img upload success': "Image Chargée",
-        'analysis_spinner': 'Analyse en cours...',
+        "upload_label": "Choisissez une image du billet :",
+        "contour_fail": "Contour du billet non détecté, veuillez reprendre l'image.",
+        "img_upload_success": "Image Chargée",
+        "analysis_spinner": "Analyse en cours...",
         "success": "Le billet semble authentique.",
         "warning": "Attention : Risque de contrefaçon !"
     },
     "English": {
+        "sidebar_title": "About the Author",
+        "role": "**Data Scientist & AI Engineer**",
+        "bio": "Passionate about the intersection of AI and Finance. This project demonstrates the application of **Computer Vision** to secure transactions in the CEMAC zone.",
+        "linkedin_btn": "My LinkedIn Profile",
+        "lang_label": "Choose Language",
         "button_label": "Analyze banknote",
         "title": "Counterfeit Note Detector (10,000 FCFA)",
-        'upload label': "Upload an image of the bank note :",
-        'contour fail': "Banknote contour not detected, Please retake Image.",
-        'img upload success': 'Image uploaded successfully',
-        'analysis_spinner': 'Analysis in progress...',
+        "upload_label": "Upload an image of the bank note:",
+        "contour_fail": "Banknote contour not detected, please retake image.",
+        "img_upload_success": "Image uploaded successfully",
+        "analysis_spinner": "Analysis in progress...",
         "success": "The note appears to be authentic.",
         "warning": "Warning: High risk of counterfeit!"
     }
 }
 
-texts = LANGUAGES[language]
+texts = LANGUAGES[lang]
+
+with st.sidebar:
+    st.image("False_10K_fcfa_bank_note_detection/pp_.jpeg", width=150)
+    st.title(texts["sidebar_title"])
+    st.markdown(f"""
+    ## **Marcel MBOUA**
+    {texts["role"]}  
+    *Quant Enthusiast*
+    
+    ---
+    {texts["bio"]}
+    """)
+    
+    linkedin_url = "https://linkedin.com/in/marcel-mboua-285882237"
+    st.markdown(f'''
+        <a href="{linkedin_url}" target="_blank" style="text-decoration: none;">
+            <button style="width: 100%; background-color: #0077B5; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                {texts["linkedin_btn"]}
+            </button>
+        </a>
+    ''', unsafe_allow_html=True)
 
 st.title(texts["title"]) 
 
 model_type = "Fine-Tuned ResNet"
 
-uploaded_file = st.file_uploader(texts["upload label"], type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader(texts["upload_label"], type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -209,7 +238,7 @@ if uploaded_file is not None:
         # Convert back to RGB for Streamlit display
         cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
 
-        st.image(cropped_rgb, caption=texts['img upload success'], width=400)
+        st.image(cropped_rgb, caption=texts['img_upload_success'], width=400)
 
         if st.button(texts['button_label']):
             with st.spinner(texts['analysis_spinner']):
