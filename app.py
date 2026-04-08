@@ -159,10 +159,42 @@ def tight_crop_banknote(img):
  
 # --- UI Streamlit ---
 st.set_page_config(page_title="False 10K_Detect", layout="wide")
-st.title("Détection de billets 10,000 XAF")
+
+col1, col2 = st.columns([10, 1])
+
+with col2:
+    language = st.selectbox('Choisissez votre langue \n Select your language :', ['Francais', 'English'])
+
+LANGUAGES = {
+    "Francais": {
+        "button_label": "Analyser le billet",
+        "title": "Détecteur de faux billets (10 000 FCFA)",
+        'upload label': "Choisissez une image du billet :",
+        'contour fail': "Contour du billet non détecté, veuillez reprendre l'image.",
+        'img upload success': "Image Chargée",
+        'analysis_spinner': 'Analyse en cours...',
+        "success": "Le billet semble authentique.",
+        "warning": "Attention : Risque de contrefaçon !"
+    },
+    "English": {
+        "button_label": "Analyze banknote",
+        "title": "Counterfeit Note Detector (10,000 FCFA)",
+        'upload label': "Upload an image of the bank note :",
+        'contour fail': "Banknote contour not detected, Please retake Image.",
+        'img upload success': 'Image uploaded successfully',
+        'analysis_spinner': 'Analysis in progress...',
+        "success": "The note appears to be authentic.",
+        "warning": "Warning: High risk of counterfeit!"
+    }
+}
+
+texts = LANGUAGES[language]
+
+st.title(texts["title"]) 
+
 model_type = "Fine-Tuned ResNet"
 
-uploaded_file = st.file_uploader("Choisissez une image de billet :", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader(texts["upload label"], type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -172,15 +204,15 @@ if uploaded_file is not None:
     cropped = tight_crop_banknote(img_cv)
     
     if cropped is None:
-        st.error("Banknote contour not detected, Please retake Image.")
+        st.error(texts['contour fail'])
     else:
         # Convert back to RGB for Streamlit display
         cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
 
-        st.image(cropped_rgb, caption="Image Chargée", width=400)
+        st.image(cropped_rgb, caption=texts['img upload success'], width=400)
 
-        if st.button("Analyser le billet"):
-            with st.spinner('Analyse en cours...'):
+        if st.button(texts['button_label']):
+            with st.spinner(texts['analysis_spinner']):
                 device = torch.device("cpu")
                 
                 num_classes = 1
@@ -213,6 +245,6 @@ if uploaded_file is not None:
                     prob = torch.sigmoid(outputs).numpy()
                     prediction = (prob > 0.99)
                     if prediction[0] == 1:
-                        st.success(f"Le billet semble être une coupure authentique de 10,000 XAF.")
+                        st.success(texts['success'])
                     else:
-                        st.error(f"Alerte : Probabilité de contrefaçon détectée !")
+                        st.error(texts['warning'])
