@@ -199,7 +199,7 @@ LANGUAGES = {
 texts = LANGUAGES[lang]
 
 with st.sidebar:
-    st.image("False_10K_fcfa_bank_note_detection/pp_.jpeg", width=150)
+    st.image("pp_.jpeg", width=150)
     st.title(texts["sidebar_title"])
     st.markdown(f"""
     ## **Marcel MBOUA**
