@@ -176,7 +176,7 @@ LANGUAGES = {
         "contour_fail": "Contour du billet non détecté, veuillez reprendre l'image.",
         "img_upload_success": "Image Chargée",
         "analysis_spinner": "Analyse en cours...",
-        "success": "Le billet semble authentique.",
+        "success": ["Le billet semble authentique.", "Confiance"],
         "warning": "Attention : Risque de contrefaçon !"
     },
     "English": {
@@ -191,7 +191,7 @@ LANGUAGES = {
         "contour_fail": "Banknote contour not detected, please retake image.",
         "img_upload_success": "Image uploaded successfully",
         "analysis_spinner": "Analysis in progress...",
-        "success": "The note appears to be authentic.",
+        "success": ["The note appears to be authentic.", "Confidence"],
         "warning": "Warning: High risk of counterfeit!"
     }
 }
@@ -223,6 +223,28 @@ st.title(texts["title"])
 
 model_type = "Fine-Tuned ResNet"
 
+# --- CHARGEMENT DU MODÈLE ---
+@st.cache_resource
+def load_model():
+    device = torch.device("cpu")
+    num_classes = 1
+    # On définit l'architecture
+    model = models.resnet18(weights=None)
+    model.fc = nn.Sequential(
+        nn.Linear(model.fc.in_features, 128),
+        nn.ReLU(),
+        nn.Dropout(0.4),
+        nn.Linear(128, num_classes)
+    )
+    # Chargement des poids
+    model.load_state_dict(torch.load("banknote_classifier.pth", map_location=device))
+    model.to(device)
+    model.eval()
+    return model, device
+
+# Appel de la fonction de chargement
+model, device = load_model()
+
 uploaded_file = st.file_uploader(texts["upload_label"], type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
@@ -242,19 +264,6 @@ if uploaded_file is not None:
 
         if st.button(texts['button_label']):
             with st.spinner(texts['analysis_spinner']):
-                device = torch.device("cpu")
-                
-                num_classes = 1
-                model = models.resnet18(weights=None)
-                model.fc = nn.Sequential(
-                    nn.Linear(model.fc.in_features, 128),
-                    nn.ReLU(),
-                    nn.Dropout(0.4),
-                    nn.Linear(128, num_classes)
-                )
-                model.load_state_dict(torch.load("banknote_classifier.pth", map_location=device))
-                model.to(device)
-                model.eval()
 
                 val_transform = transforms.Compose([
                     transforms.Resize((224, 224)),
@@ -271,9 +280,8 @@ if uploaded_file is not None:
                 with torch.no_grad():
                     # threshold = st.slider("Seuil de prediction :", 0.0, 1.0, step=0.01)
                     outputs = model(image)
-                    prob = torch.sigmoid(outputs).numpy()
-                    prediction = (prob > 0.99)
-                    if prediction[0] == 1:
-                        st.success(texts['success'])
+                    prob = torch.sigmoid(outputs).cpu().item()
+                    if prob > 0.99:
+                        st.success(f"{texts['success'][0]} ({texts['success'][1]}: {prob:.2%})")
                     else:
-                        st.error(texts['warning'])
+                        st.error(f"{texts['warning']} (Score: {prob:.2%})")
