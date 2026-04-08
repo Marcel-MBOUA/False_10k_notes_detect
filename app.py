@@ -159,7 +159,7 @@ def tight_crop_banknote(img):
  
 # --- UI Streamlit ---
 st.set_page_config(page_title="False 10K_Detect", layout="wide")
-col1, col2 = st.columns([10, 1])
+col1, col2 = st.columns([8, 1])
 with col2:
     lang = st.radio("🌐 Langue / Language", ["Français", "English"], horizontal=True)
 
@@ -233,7 +233,7 @@ if uploaded_file is not None:
     cropped = tight_crop_banknote(img_cv)
     
     if cropped is None:
-        st.error(texts['contour fail'])
+        st.error(texts['contour_fail'])
     else:
         # Convert back to RGB for Streamlit display
         cropped_rgb = cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB)
